@@ -14,7 +14,7 @@ public class SessionFactoryImpl implements SessionFactory {
 
     public SessionFactoryImpl() {}
 
-    public static synchronized SessionFactory getInstance() throws SQLException {
+    public static synchronized SessionFactory getInstance() {
         if (instance == null) {
             instance = new SessionFactoryImpl();
         }

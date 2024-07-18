@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class QueryImpl<T> implements Query<T> {
@@ -21,7 +23,7 @@ public class QueryImpl<T> implements Query<T> {
     public QueryImpl(QueryWrapper queryWrapper, Connection connection, Class<T> entityClass) {
         this.queryWrapper = queryWrapper;
         parameters = new ArrayList<>();
-        mapper = new EntityMapper();
+        mapper = new EntityMapper(connection);
         this.connection = connection;
         this.entityClass = entityClass;
     }
@@ -34,7 +36,7 @@ public class QueryImpl<T> implements Query<T> {
         }
         ResultSet resultSet = statement.executeQuery();
 
-        return mapper.mapResultSet(resultSet, entityClass);
+        return mapper.mapResultSet(resultSet, entityClass, new HashSet<>());
     }
 
     @Override
