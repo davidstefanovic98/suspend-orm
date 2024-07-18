@@ -236,21 +236,4 @@ public class EntityMapper {
             return fieldName;
         }
     }
-
-    private Object findProcessedEntity(Object entityId, Class<?> entityClass, Map<Class<?>, Set<Object>> processedEntities) {
-        Set<Object> processedIds = processedEntities.get(entityClass);
-        for (Object processedEntity : processedIds) {
-            Field idField = findIdField(entityClass);
-            idField.setAccessible(true);
-            try {
-                Object id = idField.get(processedEntity);
-                if (id != null && id.equals(entityId)) {
-                    return processedEntity;
-                }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Failed to access entity ID field", e);
-            }
-        }
-        return null;
-    }
 }
