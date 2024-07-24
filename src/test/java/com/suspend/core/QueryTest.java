@@ -1,6 +1,7 @@
 package com.suspend.core;
 
 import com.suspend.annotation.*;
+import com.suspend.core.exception.SuspendException;
 import com.suspend.core.internal.SessionFactoryImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import java.sql.SQLException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class QueryTest {
 
@@ -102,5 +103,28 @@ class QueryTest {
                 .openSession()
                 .createQuery("select * from test", Test.class);
         List<Test> tests = query.getResultList();
+        assertEquals(3, tests.size());
+
+        assertFalse(tests.get(0).getUsers().isEmpty());
+    }
+
+    @org.junit.jupiter.api.Test
+    void uniqueResult_returnsSingleResult() throws SQLException {
+        Query<Test> query = sessionFactory
+                .openSession()
+                .createQuery("select * from test where id = 1", Test.class);
+
+        Test actualEntity = query.uniqueResult();
+
+        assertEquals(1, actualEntity.getId());
+    }
+
+    @org.junit.jupiter.api.Test
+    void uniqueResult_throwsExceptionIfMoreThanOneResult() throws SQLException {
+        Query<Test> query = sessionFactory
+                .openSession()
+                .createQuery("select * from test", Test.class);
+
+        assertThrows(SQLException.class, query::uniqueResult);
     }
 }

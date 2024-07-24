@@ -1,6 +1,7 @@
 package com.suspend.core.internal;
 
 import com.suspend.core.Query;
+import com.suspend.core.exception.SuspendException;
 import com.suspend.mapping.EntityMapper;
 
 import java.sql.Connection;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class QueryImpl<T> implements Query<T> {
 
@@ -36,12 +38,26 @@ public class QueryImpl<T> implements Query<T> {
         }
         ResultSet resultSet = statement.executeQuery();
 
-        return mapper.mapResultSet(resultSet, entityClass, new HashSet<>());
+        return mapper.mapResultSet(resultSet, entityClass, new CopyOnWriteArraySet<>());
     }
 
     @Override
     public T uniqueResult() throws SQLException {
-        return null;
+        PreparedStatement statement = connection.prepareStatement(queryWrapper.sql());
+        for (Parameter parameter : parameters) {
+            statement.setObject(parameter.getIndex(), parameter.getValue());
+        }
+        ResultSet resultSet = statement.executeQuery();
+
+        List<T> results = mapper.mapResultSet(resultSet, entityClass, new CopyOnWriteArraySet<>());
+
+        if (results.size() > 1) {
+            throw new SQLException("ResultSet did not return unique result.");
+        } else if (results.isEmpty()){
+            return null;
+        } else {
+            return results.get(0);
+        }
     }
 
     @Override
