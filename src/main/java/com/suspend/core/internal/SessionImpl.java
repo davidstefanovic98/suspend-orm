@@ -27,7 +27,10 @@ public class SessionImpl implements Session {
 
     @Override
     public <T> Query<T> createQuery(String sql, Class<T> entityClass) {
-        return new QueryImpl<>(new QueryWrapper(sql), connection, entityClass);
+        QueryGenerator queryGenerator = new QueryGenerator(sql, entityClass);
+        queryGenerator.appendEagerJoins();
+        String finalQuery = queryGenerator.getFinalQuery();
+        return new QueryImpl<>(new QueryWrapper(finalQuery), connection, entityClass);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.suspend.connection;
 
 import com.suspend.configuration.Configuration;
+import com.suspend.core.exception.SuspendException;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -17,16 +18,11 @@ public class ConnectionManager {
     private static final String PASSWORD_PROP = "suspend.datasource.password";
     private static final String DIALECT_PROP = "suspend.datasource.dialect";
 
-    private static Properties properties;
+    private final Properties properties;
     private Connection connection;
 
     public ConnectionManager() {
-        try {
-            properties = Configuration.loadProperties();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        properties = Configuration.getInstance().getProperties();
     }
 
     public static synchronized ConnectionManager getInstance() {
@@ -48,7 +44,7 @@ public class ConnectionManager {
                 connection = DriverManager.getConnection(url, username, password);
             }
         } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new SuspendException("Could not connect to database");
         }
         return connection;
     }

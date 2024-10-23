@@ -1,5 +1,7 @@
 package com.suspend.annotation;
 
+import com.suspend.mapping.FetchType;
+
 import java.lang.annotation.*;
 
 @Documented
@@ -7,4 +9,6 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 public @interface OneToMany {
     String mappedBy();
+
+    FetchType fetch() default FetchType.LAZY;
 }

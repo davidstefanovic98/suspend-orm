@@ -3,16 +3,17 @@ package com.suspend.core.internal;
 import com.suspend.core.Session;
 import com.suspend.core.SessionFactory;
 import com.suspend.core.exception.SuspendException;
-
-import java.sql.SQLException;
+import com.suspend.mapping.EntityReferenceContainer;
 
 public class SessionFactoryImpl implements SessionFactory {
 
     private final ThreadLocal<Session> sessions = new ThreadLocal<>();
-
     private static SessionFactory instance = null;
+    private final EntityReferenceContainer entityReferenceContainer;
 
-    public SessionFactoryImpl() {}
+    public SessionFactoryImpl() {
+        this.entityReferenceContainer = new EntityReferenceContainer();
+    }
 
     public static synchronized SessionFactory getInstance() {
         if (instance == null) {
@@ -35,5 +36,10 @@ public class SessionFactoryImpl implements SessionFactory {
             throw new SuspendException("No current session found");
         }
         return session;
+    }
+
+    @Override
+    public EntityReferenceContainer getEntityReferenceContainer() {
+        return entityReferenceContainer;
     }
 }

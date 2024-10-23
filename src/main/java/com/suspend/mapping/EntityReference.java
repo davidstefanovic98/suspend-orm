@@ -1,53 +1,57 @@
 package com.suspend.mapping;
 
-import java.util.Objects;
-
 public class EntityReference {
+    private Class<?> clazz;
     private Object entity;
     private Object entityId;
-    private boolean processing;
+    private boolean fullyProcessed;
+    private boolean mapped;
 
-    public EntityReference(Object entity, Object entityId) {
+    public EntityReference(Class<?> clazz, Object entity, Object entityId, boolean fullyProcessed, boolean mapped) {
+        this.clazz = clazz;
         this.entity = entity;
         this.entityId = entityId;
-        this.processing = false;
+        this.fullyProcessed = fullyProcessed;
+        this.mapped = mapped;
+    }
+
+    public Class<?> getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(Class<?> clazz) {
+        this.clazz = clazz;
     }
 
     public Object getEntity() {
         return entity;
     }
 
-    public Object getEntityId() {
-        return entityId;
-    }
-
     public void setEntity(Object entity) {
         this.entity = entity;
+    }
+
+    public Object getEntityId() {
+        return entityId;
     }
 
     public void setEntityId(Object entityId) {
         this.entityId = entityId;
     }
 
-    public boolean isProcessing() {
-        return processing;
+    public boolean isFullyProcessed() {
+        return fullyProcessed;
     }
 
-    public void setProcessing(boolean processing) {
-        this.processing = processing;
+    public void setFullyProcessed(boolean fullyProcessed) {
+        this.fullyProcessed = fullyProcessed;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (EntityReference) obj;
-        return Objects.equals(this.entity, that.entity) &&
-                Objects.equals(this.entityId, that.entityId);
+    public boolean isMapped() {
+        return mapped;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(entity, entityId);
+    public void setMapped(boolean mapped) {
+        this.mapped = mapped;
     }
 }
