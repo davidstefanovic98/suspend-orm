@@ -12,7 +12,7 @@ public class User {
     @Column(name = "username")
     private String username;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name="test_fk", referencedColumnName = "id")
     private TestEntity test;
 

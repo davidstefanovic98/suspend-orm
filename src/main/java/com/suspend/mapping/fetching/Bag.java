@@ -2,7 +2,7 @@ package com.suspend.mapping.fetching;
 
 import java.util.*;
 
-public class Bag<E> implements List<E> {
+public class Bag<E> extends AbstractList<E> implements List<E> {
     protected List<E> bag = new ArrayList<>();
 
     @Override
@@ -128,7 +128,7 @@ public class Bag<E> implements List<E> {
         return bag.subList(fromIndex, toIndex);
     }
 
-//    public List<E> getBag() {
-//        return bag;
-//    }
+    public List<E> getBag() {
+        return bag;
+    }
 }

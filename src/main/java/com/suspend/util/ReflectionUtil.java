@@ -157,7 +157,6 @@ public class ReflectionUtil {
 
     public static Object getValueForIdField(Object entity) {
         Field idField = getIdField(entity.getClass());
-        assert idField != null;
         return getFieldValue(entity, idField);
     }
 }

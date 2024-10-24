@@ -11,5 +11,5 @@ public @interface OneToOne {
 
     String mappedBy();
 
-    FetchType fetch() default FetchType.LAZY;
+    FetchType fetch() default FetchType.EAGER;
 }

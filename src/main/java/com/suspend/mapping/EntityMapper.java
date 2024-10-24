@@ -5,6 +5,7 @@ import com.suspend.configuration.Configuration;
 import com.suspend.core.SessionFactory;
 import com.suspend.core.exception.SuspendException;
 import com.suspend.core.internal.SessionFactoryImpl;
+import com.suspend.mapping.fetching.Bag;
 import com.suspend.mapping.fetching.FetchStrategy;
 import com.suspend.mapping.fetching.FetchingStrategyFactory;
 import com.suspend.util.ReflectionUtil;

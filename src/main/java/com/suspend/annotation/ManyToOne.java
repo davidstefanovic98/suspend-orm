@@ -11,5 +11,5 @@ public @interface ManyToOne {
 
     String mappedBy() default "";
 
-    FetchType fetch() default FetchType.LAZY;
+    FetchType fetch() default FetchType.EAGER;
 }
