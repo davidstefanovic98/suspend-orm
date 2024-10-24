@@ -1,6 +1,7 @@
 package com.suspend.mapping.fetching;
 
 import com.suspend.mapping.EntityMapper;
+import com.suspend.mapping.EntityReference;
 import com.suspend.mapping.FetchType;
 import com.suspend.mapping.Relationship;
 
@@ -9,7 +10,7 @@ import java.lang.reflect.Method;
 public class EagerFetchStrategy implements FetchStrategy {
 
     @Override
-    public Object fetch(Object entity, Relationship relationship, EntityMapper mapper, Method method) {
+    public Object fetch(EntityReference entity, Relationship relationship, EntityMapper mapper, Method method) {
         return fetchEagerly(entity, relationship);
     }
 

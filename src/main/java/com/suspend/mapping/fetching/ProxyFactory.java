@@ -1,7 +1,9 @@
 package com.suspend.mapping.fetching;
 
 import com.suspend.core.exception.SuspendException;
+import com.suspend.core.internal.SessionFactoryImpl;
 import com.suspend.mapping.EntityMapper;
+import com.suspend.mapping.EntityReference;
 import com.suspend.mapping.Relationship;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.type.TypeDescription;
@@ -13,12 +15,12 @@ import java.util.List;
 
 public class ProxyFactory {
 
-    public static <E> E createProxy(Class<E> entity, Relationship relationship, EntityMapper entityMapper) {
+    public static <E> E createProxy(EntityReference entityReference, Class<?> entity, Relationship relationship, EntityMapper entityMapper) {
         try {
-            return new ByteBuddy()
+            return (E) new ByteBuddy()
                     .subclass(entity)
                     .method(ElementMatchers.any())
-                    .intercept(InvocationHandlerAdapter.of(new EntityProxyInterceptor<>(entity, relationship, entityMapper, FetchingStrategyFactory.getFetchStrategy(relationship.getFetchingType()))))
+                    .intercept(InvocationHandlerAdapter.of(new EntityProxyInterceptor<>(entityReference, entityReference.getEntity(), relationship, entityMapper, FetchingStrategyFactory.getFetchStrategy(relationship.getFetchingType()))))
                     .make()
                     .load(entity.getClassLoader())
                     .getLoaded()
@@ -29,14 +31,14 @@ public class ProxyFactory {
         }
     }
 
-    public static <E> Bag<E> createBagProxy(E parentEntity, Relationship relationship, EntityMapper entityMapper) {
+    public static <E> Bag<E> createBagProxy(EntityReference parentEntity, Relationship relationship, EntityMapper entityMapper) {
         try {
             TypeDescription.Generic genericBagType = TypeDescription.Generic.Builder.parameterizedType(Bag.class, relationship.getRelatedEntity()).build();
             return (Bag<E>) new ByteBuddy()
                     .subclass(genericBagType)
                     .implement(List.class)
-                    .method(ElementMatchers.any().or(ElementMatchers.not(ElementMatchers.named("getBag"))))
-                    .intercept(MethodDelegation.to(new BagProxyInterceptor<>(parentEntity, relationship, entityMapper, FetchingStrategyFactory.getFetchStrategy(relationship.getFetchingType()))))
+                    .method(ElementMatchers.any())
+                    .intercept(MethodDelegation.to(new BagProxyInterceptor<>(parentEntity, parentEntity.getEntity(), relationship, entityMapper, FetchingStrategyFactory.getFetchStrategy(relationship.getFetchingType()))))
                     .make()
                     .load(Bag.class.getClassLoader())
                     .getLoaded()

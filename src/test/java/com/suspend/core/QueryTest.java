@@ -41,6 +41,12 @@ class QueryTest {
 
         int size = users.size();
 
+        for (User user : users) {
+            TestEntity test = user.getTest();
+            String name = test.getTestName();
+            assertEquals("Marija", name);
+        }
+
         assertEquals(1, size);
     }
 

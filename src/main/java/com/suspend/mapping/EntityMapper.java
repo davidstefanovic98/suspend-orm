@@ -25,6 +25,7 @@ public class EntityMapper {
 
     public <T> List<T> mapResultSet(ResultSet resultSet, Class<T> entityClass) {
         List<T> results = new ArrayList<>();
+        List<ForeignKey> foreignKeys = new ArrayList<>();
 
         try {
             ResultSetMetaData metaData = resultSet.getMetaData();
@@ -45,11 +46,21 @@ public class EntityMapper {
                             throw new SuspendException("Failed to set value to field " + field.getName(), e);
                         }
                     }
+
+                    for (Field f : entityClass.getDeclaredFields()) {
+                        if (f.isAnnotationPresent(ManyToOne.class)) {
+                            JoinColumn joinColumn = f.getAnnotation(JoinColumn.class);
+                            if (joinColumn != null && columnName.equals(joinColumn.name())) {
+                                ForeignKey foreignKey = new ForeignKey(value, joinColumn.name(), entityClass, f.getType());
+                                foreignKeys.add(foreignKey);
+                            }
+                        }
+                    }
                 }
-                EntityReference entityReference = new EntityReference(entityClass, entity, ReflectionUtil.getValueForIdField(entity), false, false);
+                EntityReference entityReference = new EntityReference(entityClass, entity, ReflectionUtil.getValueForIdField(entity), false, false, foreignKeys);
                 entityReferenceContainer.addEntityReference(entityReference);
 
-                mapRelationships(entity);
+                mapRelationships(entity, foreignKeys);
                 results.add(entity);
             }
         } catch (SQLException e) {
@@ -59,7 +70,7 @@ public class EntityMapper {
         return results;
     }
 
-    private void mapRelationships(Object entity) {
+    private void mapRelationships(Object entity, List<ForeignKey> foreignKeys) {
         Class<?> entityClass = entity.getClass();
         Object entityId = ReflectionUtil.getValueForIdField(entity);
 
@@ -76,7 +87,7 @@ public class EntityMapper {
 
             Field field = relationship.getField();
             try {
-                Object value = fetchStrategy.fetch(entity, relationship, this, null);
+                Object value = fetchStrategy.fetch(entityReference, relationship, this, null);
                 field.setAccessible(true);
                 field.set(entity, value);
             } catch (SQLException | IllegalAccessException e) {
@@ -84,9 +95,10 @@ public class EntityMapper {
             }
         }
         if (entityReference != null) {
+            entityReference.setEntity(entity);
             entityReference.setFullyProcessed(true);
         } else {
-            entityReference = new EntityReference(entityClass, entity, entityId, true, false);
+            entityReference = new EntityReference(entityClass, entity, entityId, true, false, foreignKeys);
             entityReferenceContainer.addEntityReference(entityReference);
         }
     }
