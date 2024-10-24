@@ -39,6 +39,15 @@ public class SessionFactoryImpl implements SessionFactory {
     }
 
     @Override
+    public void closeSession() throws SuspendException {
+        Session session = sessions.get();
+        if (session != null) {
+            session.close();
+        }
+        sessions.remove();
+    }
+
+    @Override
     public EntityReferenceContainer getEntityReferenceContainer() {
         return entityReferenceContainer;
     }

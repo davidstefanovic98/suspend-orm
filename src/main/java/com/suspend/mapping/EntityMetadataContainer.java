@@ -3,6 +3,13 @@ package com.suspend.mapping;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+   TODO: This logic should be moved to SessionFactory.
+ */
+
+/**
+ * The EntityMetadataContainer class holds the general information of entities, when packages are scanned.
+ */
 public class EntityMetadataContainer {
     private final List<EntityMetadata> entities;
 

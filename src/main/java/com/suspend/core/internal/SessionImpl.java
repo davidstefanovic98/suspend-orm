@@ -3,8 +3,10 @@ package com.suspend.core.internal;
 import com.suspend.connection.ConnectionManager;
 import com.suspend.core.Query;
 import com.suspend.core.Session;
+import com.suspend.core.exception.SuspendException;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class SessionImpl implements Session {
 
@@ -35,11 +37,19 @@ public class SessionImpl implements Session {
 
     @Override
     public void clear() {
-
+        SessionFactoryImpl.getInstance().getEntityReferenceContainer().clear();
     }
 
     @Override
-    public Connection close() {
-        return null;
+    public void close() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new SuspendException("Failed to close connection", e);
+        } finally {
+            clear();
+        }
     }
 }

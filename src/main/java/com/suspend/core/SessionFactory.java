@@ -12,5 +12,7 @@ public interface SessionFactory {
 
     Session getCurrentSession() throws SuspendException;
 
+    void closeSession() throws SuspendException;
+
     EntityReferenceContainer getEntityReferenceContainer();
 }

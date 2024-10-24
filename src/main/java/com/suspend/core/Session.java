@@ -1,7 +1,5 @@
 package com.suspend.core;
 
-import java.sql.Connection;
-
 public interface Session {
 
     void persist(Object object);
@@ -12,6 +10,6 @@ public interface Session {
 
     void clear();
 
-    Connection close();
+    void close();
 }
 
