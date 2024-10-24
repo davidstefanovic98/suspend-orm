@@ -6,6 +6,7 @@ import com.suspend.mapping.EntityMapper;
 import com.suspend.mapping.EntityReference;
 import com.suspend.mapping.Relationship;
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.NamingStrategy;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -18,6 +19,7 @@ public class ProxyFactory {
     public static <E> E createProxy(EntityReference entityReference, Class<?> entity, Relationship relationship, EntityMapper entityMapper) {
         try {
             return (E) new ByteBuddy()
+                    .with(new NamingStrategy.SuffixingRandom("SuspendProxy"))
                     .subclass(entity)
                     .method(ElementMatchers.any())
                     .intercept(InvocationHandlerAdapter.of(new EntityProxyInterceptor<>(entityReference, entityReference.getEntity(), relationship, entityMapper, FetchingStrategyFactory.getFetchStrategy(relationship.getFetchingType()))))
@@ -35,6 +37,7 @@ public class ProxyFactory {
         try {
             TypeDescription.Generic genericBagType = TypeDescription.Generic.Builder.parameterizedType(Bag.class, relationship.getRelatedEntity()).build();
             return (Bag<E>) new ByteBuddy()
+                    .with(new NamingStrategy.SuffixingRandom("SuspendProxy"))
                     .subclass(genericBagType)
                     .implement(List.class)
                     .method(ElementMatchers.any())

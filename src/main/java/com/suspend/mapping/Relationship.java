@@ -66,4 +66,8 @@ public class Relationship {
     public void setPrimaryKeyField(String primaryKeyField) {
         this.primaryKeyField = primaryKeyField;
     }
+
+    public boolean isManyToOne() {
+        return relationshipType.equals(RelationshipType.MANY_TO_ONE);
+    }
 }

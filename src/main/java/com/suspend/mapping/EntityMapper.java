@@ -77,7 +77,10 @@ public class EntityMapper {
         EntityReference entityReference = entityReferenceContainer.getEntityReference(entityClass, entityId);
 
         if (entityReference != null && entityReference.isFullyProcessed()) {
-            return;
+            if (entityReference.getEntity() != null) {
+                entity = entityReference.getEntity();
+                return;
+            }
         }
 
         EntityMetadata entityMetadata = entityMetadataContainer.getEntityMetadata(entity.getClass());
@@ -87,7 +90,16 @@ public class EntityMapper {
 
             Field field = relationship.getField();
             try {
-                Object value = fetchStrategy.fetch(entityReference, relationship, this, null);
+                Object value = null;
+                ForeignKey foreignKey = getForeignKeyForRelationship(foreignKeys, relationship);
+                if (foreignKey != null) {
+                    EntityReference relatedReference = entityReferenceContainer.getEntityReference(relationship.getRelatedEntity(), foreignKey.getValue());
+                    if (relatedReference != null && relatedReference.isFullyProcessed()) {
+                        value = relatedReference.getEntity();
+                    }
+                } else {
+                    value = fetchStrategy.fetch(entityReference, relationship, this, null);
+                }
                 field.setAccessible(true);
                 field.set(entity, value);
             } catch (SQLException | IllegalAccessException e) {
@@ -106,5 +118,14 @@ public class EntityMapper {
     private boolean isRelationshipField(Field field) {
         return field.isAnnotationPresent(ManyToOne.class) || field.isAnnotationPresent(OneToOne.class)
                || field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class);
+    }
+
+    private ForeignKey getForeignKeyForRelationship(List<ForeignKey> foreignKeys, Relationship relationship) {
+        for (ForeignKey foreignKey : foreignKeys) {
+            if (foreignKey.getName().equals(relationship.getForeignKeyField())) {
+                return foreignKey;
+            }
+        }
+        return null;
     }
 }
