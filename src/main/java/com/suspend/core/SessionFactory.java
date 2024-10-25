@@ -1,7 +1,9 @@
 package com.suspend.core;
 
 import com.suspend.core.exception.SuspendException;
-import com.suspend.mapping.EntityReferenceContainer;
+import com.suspend.mapping.EntityMetadata;
+
+import java.util.List;
 
 /**
  * SessionFactory will be created once in application lifecycle, through Configuration object.
@@ -14,5 +16,5 @@ public interface SessionFactory {
 
     void closeSession() throws SuspendException;
 
-    EntityReferenceContainer getEntityReferenceContainer();
+    List<EntityMetadata> getAllEntityMetadata();
 }

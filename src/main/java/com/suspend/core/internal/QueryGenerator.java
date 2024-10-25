@@ -2,9 +2,7 @@ package com.suspend.core.internal;
 
 import com.suspend.annotation.JoinColumn;
 import com.suspend.annotation.JoinTable;
-import com.suspend.configuration.Configuration;
 import com.suspend.mapping.EntityMetadata;
-import com.suspend.mapping.EntityMetadataContainer;
 import com.suspend.mapping.FetchType;
 import com.suspend.mapping.Relationship;
 import com.suspend.util.ReflectionUtil;
@@ -14,16 +12,15 @@ import java.lang.reflect.Field;
 public class QueryGenerator {
     private final StringBuilder queryBuilder;
     private final Class<?> entityClass;
-    private final EntityMetadataContainer entityMetadataContainer;
 
     public QueryGenerator(String baseQuery, Class<?> entityClass) {
         this.queryBuilder = new StringBuilder(baseQuery);
         this.entityClass = entityClass;
-        this.entityMetadataContainer = Configuration.getInstance().getEntityMetadataContainer();
     }
 
     public void appendEagerJoins() {
-        EntityMetadata entityMetadata = entityMetadataContainer.getEntityMetadata(entityClass);
+        SessionFactoryImpl sessionFactory = (SessionFactoryImpl) SessionFactoryImpl.getInstance();
+        EntityMetadata entityMetadata = sessionFactory.getEntityMetadata(entityClass);
 
         if (entityMetadata != null) {
             for (Relationship relationship : entityMetadata.getRelationships()) {

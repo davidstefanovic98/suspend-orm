@@ -1,10 +1,8 @@
 package com.suspend.configuration;
 
-import com.suspend.core.SessionFactory;
 import com.suspend.core.exception.SuspendException;
 import com.suspend.core.internal.SessionFactoryImpl;
 import com.suspend.mapping.EntityMetadata;
-import com.suspend.mapping.EntityMetadataContainer;
 import com.suspend.mapping.Relationship;
 import com.suspend.mapping.RelationshipResolver;
 import com.suspend.util.ReflectionUtil;
@@ -20,12 +18,9 @@ public class Configuration {
     private Properties properties;
     private static Configuration instance = null;
     private String propertiesFile;
-    private EntityMetadataContainer entityMetadataContainer;
     private String entityPackageName;
 
-    public Configuration() {
-        entityMetadataContainer = new EntityMetadataContainer();
-    }
+    public Configuration() {}
 
     private Properties loadProperties() {
         Properties properties = new Properties();
@@ -56,29 +51,17 @@ public class Configuration {
         this.propertiesFile = propertiesFile;
     }
 
-    public EntityMetadataContainer getEntityMetadataContainer() {
-        return entityMetadataContainer;
-    }
-
-    public void setEntityMetadataContainer(EntityMetadataContainer entityMetadataContainer) {
-        this.entityMetadataContainer = entityMetadataContainer;
-    }
-
-    public SessionFactory buildSessionFactory() {
+    public void buildSessionFactory() {
+        SessionFactoryImpl sessionFactory = (SessionFactoryImpl) SessionFactoryImpl.getInstance();
         this.properties = loadProperties();
-        populateEntityReferenceContainer();
-        return new SessionFactoryImpl();
-    }
-
-    public String getEntityPackageName() {
-        return entityPackageName;
+        populateEntityMetadata(sessionFactory);
     }
 
     public void setEntityPackageName(String entityPackageName) {
         this.entityPackageName = entityPackageName;
     }
 
-    private void populateEntityReferenceContainer() {
+    private void populateEntityMetadata(SessionFactoryImpl sessionFactory) {
         Set<Class<?>> entityClasses = ReflectionUtil.getEntityClasses(entityPackageName);
 
         for (Class<?> entityClass : entityClasses) {
@@ -90,7 +73,7 @@ public class Configuration {
                     relationships
             );
 
-            entityMetadataContainer.addEntityMetadata(entityMetadata);
+            sessionFactory.addEntityMetadata(entityMetadata);
         }
     }
 }

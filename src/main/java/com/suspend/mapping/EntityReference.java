@@ -3,6 +3,10 @@ package com.suspend.mapping;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class holds a reference to the object that is being mapped.
+ * It will also in the future hold the status of an entity.
+ */
 public class EntityReference {
     private Class<?> clazz;
     private Object entity;

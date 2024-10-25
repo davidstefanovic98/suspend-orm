@@ -2,6 +2,10 @@ package com.suspend.mapping;
 
 import java.util.List;
 
+/**
+ * This class will hold the general information about an entity.
+ * It is open for expanding.
+ */
 public class EntityMetadata {
     private Class<?> entityClass;
     private Object entityId;

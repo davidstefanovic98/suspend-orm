@@ -5,7 +5,7 @@ import com.suspend.configuration.Configuration;
 import com.suspend.core.SessionFactory;
 import com.suspend.core.exception.SuspendException;
 import com.suspend.core.internal.SessionFactoryImpl;
-import com.suspend.mapping.fetching.Bag;
+import com.suspend.core.internal.SessionImpl;
 import com.suspend.mapping.fetching.FetchStrategy;
 import com.suspend.mapping.fetching.FetchingStrategyFactory;
 import com.suspend.util.ReflectionUtil;
@@ -15,12 +15,12 @@ import java.sql.*;
 import java.util.*;
 
 public class EntityMapper {
-    private final EntityReferenceContainer entityReferenceContainer;
-    private final EntityMetadataContainer entityMetadataContainer;
+    private final SessionFactoryImpl sessionFactory;
+    private final SessionImpl session;
 
     public EntityMapper() {
-        this.entityReferenceContainer = SessionFactoryImpl.getInstance().getEntityReferenceContainer();
-        this.entityMetadataContainer = Configuration.getInstance().getEntityMetadataContainer();
+        this.sessionFactory = (SessionFactoryImpl) SessionFactoryImpl.getInstance();
+        this.session = (SessionImpl) sessionFactory.getCurrentSession();
     }
 
     public <T> List<T> mapResultSet(ResultSet resultSet, Class<T> entityClass) {
@@ -58,7 +58,7 @@ public class EntityMapper {
                     }
                 }
                 EntityReference entityReference = new EntityReference(entityClass, entity, ReflectionUtil.getValueForIdField(entity), false, false, foreignKeys);
-                entityReferenceContainer.addEntityReference(entityReference);
+                session.addEntityReference(entityReference);
 
                 mapRelationships(entity, foreignKeys);
                 results.add(entity);
@@ -74,28 +74,30 @@ public class EntityMapper {
         Class<?> entityClass = entity.getClass();
         Object entityId = ReflectionUtil.getValueForIdField(entity);
 
-        EntityReference entityReference = entityReferenceContainer.getEntityReference(entityClass, entityId);
+        EntityReference entityReference = session.getEntityReference(entityClass, entityId);
 
         if (entityReference != null && entityReference.isFullyProcessed()) {
             if (entityReference.getEntity() != null) {
-                entity = entityReference.getEntity();
+                entityReference.setEntity(entity);
                 return;
             }
         }
 
-        EntityMetadata entityMetadata = entityMetadataContainer.getEntityMetadata(entity.getClass());
+        EntityMetadata entityMetadata = sessionFactory.getEntityMetadata(entity.getClass());
 
         for (Relationship relationship : entityMetadata.getRelationships()) {
             FetchStrategy fetchStrategy = FetchingStrategyFactory.getFetchStrategy(relationship.getFetchingType());
 
             Field field = relationship.getField();
             try {
-                Object value = null;
+                Object value;
                 ForeignKey foreignKey = getForeignKeyForRelationship(foreignKeys, relationship);
                 if (foreignKey != null) {
-                    EntityReference relatedReference = entityReferenceContainer.getEntityReference(relationship.getRelatedEntity(), foreignKey.getValue());
+                    EntityReference relatedReference = session.getEntityReference(relationship.getRelatedEntity(), foreignKey.getValue());
                     if (relatedReference != null && relatedReference.isFullyProcessed()) {
                         value = relatedReference.getEntity();
+                    } else {
+                        value = fetchStrategy.fetch(entityReference, relationship, this, null);
                     }
                 } else {
                     value = fetchStrategy.fetch(entityReference, relationship, this, null);
@@ -111,7 +113,7 @@ public class EntityMapper {
             entityReference.setFullyProcessed(true);
         } else {
             entityReference = new EntityReference(entityClass, entity, entityId, true, false, foreignKeys);
-            entityReferenceContainer.addEntityReference(entityReference);
+            session.addEntityReference(entityReference);
         }
     }
 

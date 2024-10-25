@@ -70,4 +70,16 @@ public class Relationship {
     public boolean isManyToOne() {
         return relationshipType.equals(RelationshipType.MANY_TO_ONE);
     }
+
+    public boolean isOneToMany() {
+        return relationshipType.equals(RelationshipType.ONE_TO_MANY);
+    }
+
+    public boolean isOneToOne() {
+        return relationshipType.equals(RelationshipType.ONE_TO_ONE);
+    }
+
+    public boolean isManyToMany() {
+        return relationshipType.equals(RelationshipType.MANY_TO_MANY);
+    }
 }

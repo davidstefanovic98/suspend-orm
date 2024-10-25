@@ -3,17 +3,18 @@ package com.suspend.core.internal;
 import com.suspend.core.Session;
 import com.suspend.core.SessionFactory;
 import com.suspend.core.exception.SuspendException;
-import com.suspend.mapping.EntityReferenceContainer;
+import com.suspend.mapping.EntityMetadata;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SessionFactoryImpl implements SessionFactory {
 
     private final ThreadLocal<Session> sessions = new ThreadLocal<>();
     private static SessionFactory instance = null;
-    private final EntityReferenceContainer entityReferenceContainer;
+    private final List<EntityMetadata> entities = new ArrayList<>();
 
-    public SessionFactoryImpl() {
-        this.entityReferenceContainer = new EntityReferenceContainer();
-    }
+    private SessionFactoryImpl() {}
 
     public static synchronized SessionFactory getInstance() {
         if (instance == null) {
@@ -33,7 +34,7 @@ public class SessionFactoryImpl implements SessionFactory {
     public Session getCurrentSession() throws SuspendException {
         Session session = sessions.get();
         if (session == null) {
-            throw new SuspendException("No current session found");
+            throw new SuspendException("No current session found. Please ensure that the session is opened.");
         }
         return session;
     }
@@ -48,7 +49,20 @@ public class SessionFactoryImpl implements SessionFactory {
     }
 
     @Override
-    public EntityReferenceContainer getEntityReferenceContainer() {
-        return entityReferenceContainer;
+    public List<EntityMetadata> getAllEntityMetadata() {
+        return entities;
+    }
+
+    public void addEntityMetadata(EntityMetadata entityMetadata) {
+        entities.add(entityMetadata);
+    }
+
+    public EntityMetadata getEntityMetadata(Class<?> entityClass) {
+        for (EntityMetadata metadata : entities) {
+            if (metadata.getEntityClass().equals(entityClass)) {
+                return metadata;
+            }
+        }
+        return null;
     }
 }

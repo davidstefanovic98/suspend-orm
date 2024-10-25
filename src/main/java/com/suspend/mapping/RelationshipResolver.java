@@ -10,6 +10,8 @@ import java.util.List;
 
 public class RelationshipResolver {
 
+    private RelationshipResolver() {}
+
     public static List<Relationship> getRelationships(Class<?> entityClass) {
         List<Relationship> relationships = new ArrayList<>();
 
